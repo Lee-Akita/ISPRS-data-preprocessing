@@ -17,5 +17,5 @@ class Potsdam:
 
 
 if __name__ == '__main__':
-    po = Potsdam(dataset_path=r'../Potsdam', target_path=r'../Dataset')
+    po = Potsdam(dataset_path=r'/Users/leeakita/Desktop/Potsdam', target_path=r'/Users/leeakita/Desktop/Dataset')
     po.start_dealWith()
