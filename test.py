@@ -1,14 +1,13 @@
-import glob
-import tqdm
+import os
+import re
 import cv2
 import numpy as np
 
-haha = glob.glob('/Users/leeakita/Desktop/Dataset/Label/*.png')
-file_tqdm = tqdm.tqdm(haha, total=len(haha))
-ge = set()
-for i in file_tqdm:
-    img = cv2.imread(i)
-    for k in np.unique(img):
-        ge.add(k)
-file_tqdm.close()
-print(ge)
+data_path = r'C:\Users\akitalee\Desktop\Potsdam'
+my_re = re.compile(r'\d+')
+
+my = os.listdir(os.path.join(data_path, 'Label'))
+for i in my:
+    img = cv2.imread(os.path.join(data_path, 'Label', i))
+    print(np.unique(img), end='   ')
+    print(i)
