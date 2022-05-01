@@ -1,5 +1,5 @@
-from isprs.potsdam import Potsdam
+from isprs.vaihingen import Vaihingen
 
 if __name__ == '__main__':
-    po = Potsdam(dataset_path=r'C:\Users\akitalee\Desktop\Potsdam', target_path=r'C:\Users\akitalee\Desktop\my')
-    po.start_dealWith(split_size=512)
+    v = Vaihingen(dataset_path=r'ISPRS源路径', target_path=r'处理完数据保存的路径')
+    v.start_dealWith(split_size='分割后单张图片的尺寸')
