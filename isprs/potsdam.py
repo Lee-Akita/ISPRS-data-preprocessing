@@ -41,7 +41,7 @@ class Potsdam:
                     split_dsm = dsm[x * split_size:(x + 1) * split_size, y * split_size:(y + 1) * split_size]
                     split_image = image[x * split_size:(x + 1) * split_size, y * split_size:(y + 1) * split_size]
                     split_label = label[x * split_size:(x + 1) * split_size, y * split_size:(y + 1) * split_size]
-                    cv2.imwrite(os.path.join(self.target_path, 'DSM', str(num) + '.tiff'), split_dsm)
+                    cv2.imwrite(os.path.join(self.target_path, 'DSM', str(num) + '.tif'), split_dsm)
                     cv2.imwrite(os.path.join(self.target_path, 'RGB', str(num) + '.png'), split_image)
                     cv2.imwrite(os.path.join(self.target_path, 'Label', str(num) + '.png'), split_label)
                     num += 1
