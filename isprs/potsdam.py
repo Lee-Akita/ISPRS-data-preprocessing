@@ -1,7 +1,26 @@
 import os
 import re
+import numpy as np
 import tqdm
-import cv2
+from PIL import Image
+
+Potsdam_COLOR_MAP = [
+    [255, 255, 255],  # 不透水路面 Impervious surfaces (RGB: 255, 255, 255)
+    [0, 0, 255],  # 建筑物 Building (RGB: 0, 0, 255)
+    [0, 255, 255],  # 低植被 Low vegetation (RGB: 0, 255, 255)
+    [0, 255, 0],  # 树木 Tree (RGB: 0, 255, 0)
+    [255, 255, 0],  # 汽车 Car (RGB: 255, 255, 0)
+    [255, 0, 0]  # 背景 Clutter/background (RGB: 255, 0, 0)
+]
+
+
+def RGB2Label(label, COLOR_MAP):
+    width, height = label.shape[0], label.shape[1]
+    temp_mask = np.zeros(shape=(width, height))
+    for index, color in enumerate(COLOR_MAP):
+        locations = np.all(label == color, axis=-1)
+        temp_mask[locations] = index
+    return temp_mask.astype(dtype=np.int8)
 
 
 class Potsdam:
@@ -19,30 +38,26 @@ class Potsdam:
         tqdm_file_flag = tqdm.tqdm(self.file_flag, total=len(self.file_flag))
         for flag in tqdm_file_flag:
             # 进行数据的读取
-            label = cv2.imread(os.path.join(self.Label_path, 'top_potsdam_' + flag + '_label.tif'))
-            image = cv2.imread(os.path.join(self.RGB_path, 'top_potsdam_' + flag + '_RGB.tif'))
-            dsm = cv2.imread(os.path.join(self.DSM_path, 'dsm_potsdam_' + flag + '.tif'), -1)
+            label = np.array(Image.open(os.path.join(self.Label_path, 'top_potsdam_' + flag + '_label.tif')))
+            image = np.array(Image.open(os.path.join(self.RGB_path, 'top_potsdam_' + flag + '_RGB.tif')))
+            dsm = np.array(Image.open(os.path.join(self.DSM_path, 'dsm_potsdam_' + flag + '.tif')))
             # 由于标号6_7的标签有其他像素值，进行修正
             if flag == '6_7':
                 label[label == 252] = 255
             # 将像素值进行对应的转换
-            label[label == 255] = 1
-            label = label[:, :, 2] * 4 + label[:, :, 1] * 2 + label[:, :, 0]
-            label = label - 1
-            label[label == 5] = 4
-            label[label == 6] = 5
+            mask = RGB2Label(label=label, COLOR_MAP=Potsdam_COLOR_MAP)
             # 开始进行切割
-            min_x = min(image.shape[0], dsm.shape[0], label.shape[0])
-            min_y = min(image.shape[1], dsm.shape[1], label.shape[1])
+            min_x = min(image.shape[0], dsm.shape[0], mask.shape[0])
+            min_y = min(image.shape[1], dsm.shape[1], mask.shape[1])
             range_x = min_x // split_size
             range_y = min_y // split_size
             for x in range(range_x):
                 for y in range(range_y):
                     split_dsm = dsm[x * split_size:(x + 1) * split_size, y * split_size:(y + 1) * split_size]
                     split_image = image[x * split_size:(x + 1) * split_size, y * split_size:(y + 1) * split_size]
-                    split_label = label[x * split_size:(x + 1) * split_size, y * split_size:(y + 1) * split_size]
-                    cv2.imwrite(os.path.join(self.target_path, 'DSM', str(num) + '.tif'), split_dsm)
-                    cv2.imwrite(os.path.join(self.target_path, 'RGB', str(num) + '.png'), split_image)
-                    cv2.imwrite(os.path.join(self.target_path, 'Label', str(num) + '.png'), split_label)
+                    split_mask = mask[x * split_size:(x + 1) * split_size, y * split_size:(y + 1) * split_size]
+                    Image.fromarray(split_dsm).save(os.path.join(self.target_path, 'DSM', str(num) + '.tif'))
+                    Image.fromarray(split_image).save(os.path.join(self.target_path, 'RGB', str(num) + '.png'))
+                    Image.fromarray(split_mask).save(os.path.join(self.target_path, 'Label', str(num) + '.png'))
                     num += 1
         tqdm_file_flag.close()
