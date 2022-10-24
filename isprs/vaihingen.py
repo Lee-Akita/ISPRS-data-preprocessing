@@ -1,5 +1,4 @@
 import os
-import cv2
 import tqdm
 import numpy as np
 from PIL import Image
@@ -38,7 +37,7 @@ class Vaihingen:
         for file in tqdm_flag:
             # 进行数据的读取
             image = np.array(Image.open(os.path.join(self.RGB_path, file)))
-            dsm = np.array(Image.open(os.path.join(self.RGB_path, file)))
+            dsm = np.array(Image.open(os.path.join(self.DSM_path, file)))
             label = np.array(Image.open(os.path.join(self.Label_path, file)))
             # 将像素值进行对应的转换
             mask = RGB2Label(label=label, COLOR_MAP=Vaihingen_COLOR_MAP)
